@@ -1,0 +1,49 @@
+.user-list {
+  margin: 0rem 1rem;
+
+  .profile-box {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 30rem;
+
+    .profile-box-name {
+      font-size: 14px;
+    }
+
+    .profile-box-email {
+      font-size: 12px;
+      padding: 0;
+      align-self: flex-start;
+    }
+
+    .icon-box {
+      color: $gray-mid;
+      margin-left: auto;
+    }
+  }
+}
+
+.video-call-modal {
+  padding: 1rem;
+  outline: none;
+
+  video {
+    object-fit: contain;
+    height: 40vh;
+    width: 100%;
+  }
+  .modal-close-button {
+    color: $gray;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+    }
+  }
+}
