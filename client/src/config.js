@@ -4,7 +4,7 @@
  */
 
 const config = {
-	name: 'React Redux Saga Hot | MERN Boilerplate',
+	name: 'WebRTC | For us',
 	description:
 		'A boilerplate for mern stack which enables true hot reloading and time travel.',
 };

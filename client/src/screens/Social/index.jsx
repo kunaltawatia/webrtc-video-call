@@ -21,7 +21,12 @@ class SocialIndex extends React.Component {
 
 		return (
 			<Switch>
-				<Route path={path} exact component={List} />
+				<RoutePrivate
+					isAuthenticated={isAuthenticated}
+					path={path}
+					exact
+					component={List}
+				/>
 				<RoutePrivate
 					isAuthenticated={isAuthenticated}
 					path={`${path}/video-call`}
