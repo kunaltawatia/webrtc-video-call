@@ -27,7 +27,7 @@ const Login = ({ user, signIn, signOut, setStatus, status }) => {
 	const onRequest = () => setStatus('USER', STATUS.RUNNING);
 
 	if (isAuthenticated) {
-		const { picture, _id } = user.info;
+		const { picture, _id } = user.info || {};
 		return (
 			<div
 				className={classnames('login flex column', { center: mobile })}
