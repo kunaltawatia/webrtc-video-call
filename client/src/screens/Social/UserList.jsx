@@ -1,7 +1,7 @@
 import React, { createRef } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Video, X } from 'react-feather';
+import { Video, X, Check } from 'react-feather';
 import Modal from 'react-modal';
 
 import Image from 'components/Image';
@@ -14,6 +14,8 @@ class UserList extends React.Component {
 		this.state = {
 			videoCallModalOpen: false,
 			callingWith: null,
+			callPickedUp: false,
+			remoteDescription: null,
 		};
 		this.localStream = createRef(null);
 		this.peerStream = createRef(null);
@@ -33,34 +35,45 @@ class UserList extends React.Component {
 
 		socket
 			.on('call', (call) => {
-				this.pc = new PeerConnection(call.from);
-				this.setState(
-					{ videoCallModalOpen: true, callingWith: call.from },
-					() => {
-						this.pc
-							.on('localStream', (stream) => {
-								this.localStream.current.srcObject = stream;
-							})
-							.on('peerStream', (stream) => {
-								this.peerStream.current.srcObject = stream;
-							})
-							.recieve(call);
-					},
-				);
+				this.setState({
+					videoCallModalOpen: true,
+					callPickedUp: false,
+					callingWith: call.from,
+					remoteDescription: call.description,
+				});
 			})
 			.on('end-call', () => {
 				this.pc.stop();
-				this.setState({ videoCallModalOpen: false });
+				this.setState({ videoCallModalOpen: false, callPickedUp: false });
 			});
 	}
 
 	componentWillUnmount() {
+		this.pc?.stop();
 		socket.close();
 	}
 
 	call = (id) => {
-		this.pc = new PeerConnection(id);
-		this.setState({ videoCallModalOpen: true, callingWith: id }, () => {
+		this.setState(
+			{ videoCallModalOpen: true, callingWith: id, callPickedUp: true },
+			() => {
+				this.pc = new PeerConnection(id);
+				this.pc
+					.on('localStream', (stream) => {
+						this.localStream.current.srcObject = stream;
+					})
+					.on('peerStream', (stream) => {
+						this.peerStream.current.srcObject = stream;
+					})
+					.start();
+			},
+		);
+	};
+
+	recieve = () => {
+		this.setState({ callPickedUp: true }, () => {
+			const { callingWith: id, remoteDescription } = this.state;
+			this.pc = new PeerConnection(id);
 			this.pc
 				.on('localStream', (stream) => {
 					this.localStream.current.srcObject = stream;
@@ -68,21 +81,21 @@ class UserList extends React.Component {
 				.on('peerStream', (stream) => {
 					this.peerStream.current.srcObject = stream;
 				})
-				.start();
+				.recieve({ description: remoteDescription, from: id });
 		});
 	};
 
 	endCall = () => {
 		const { callingWith } = this.state;
 
-		this.pc.stop();
+		this.pc?.stop();
 		this.setState({ videoCallModalOpen: false });
 		socket.emit('end-call', { to: callingWith });
 	};
 
 	render() {
 		const { onlineUsers, user } = this.props;
-		const { videoCallModalOpen } = this.state;
+		const { videoCallModalOpen, callPickedUp } = this.state;
 
 		const onlineUsersExceptOwner = onlineUsers.filter(
 			(onlineUser) => onlineUser.profile?.email !== user.info?.email,
@@ -128,14 +141,33 @@ class UserList extends React.Component {
 					overlayClassName="prompt-modal-overlay"
 					ariaHideApp={false}
 				>
-					<video ref={this.peerStream} autoPlay muted />
-					<video ref={this.localStream} autoPlay muted />
-					<button className="btn" type="button" onClick={this.endCall}>
-						<div className="flex center">
-							<X />
-						</div>
-						End
-					</button>
+					{callPickedUp ? (
+						<>
+							<video ref={this.peerStream} autoPlay muted />
+							<video ref={this.localStream} autoPlay muted />
+							<button className="btn" type="button" onClick={this.endCall}>
+								<div className="flex center">
+									<X />
+								</div>
+								End
+							</button>
+						</>
+					) : (
+						<>
+							<button className="btn" type="button" onClick={this.recieve}>
+								<div className="flex center">
+									<Check />
+								</div>
+								Pick
+							</button>
+							<button className="btn" type="button" onClick={this.endCall}>
+								<div className="flex center">
+									<X />
+								</div>
+								Nope
+							</button>
+						</>
+					)}
 				</Modal>
 			</div>
 		);

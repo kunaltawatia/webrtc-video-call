@@ -1,5 +1,5 @@
 # Use latest node version 12.16.1
-FROM node:12.16.1
+FROM node:12-alpine
 
 # set /server directory as default working directory
 WORKDIR /server

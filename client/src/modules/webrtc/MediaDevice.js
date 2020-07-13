@@ -22,10 +22,9 @@ class MediaDevice extends Emitter {
 				this.stream = stream;
 				this.emit('stream', stream);
 			})
-			// eslint-disable-next-line no-console
-			.catch((err) => console.error(err));
-
-		return this;
+			.catch((err) => {
+				this.emit('error', err);
+			});
 	}
 
 	/**

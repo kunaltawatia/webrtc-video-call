@@ -65,8 +65,10 @@ async function authenticate(req, res, next) {
 		const payload = ticket.getPayload();
 		const { hd: domain, email } = payload;
 
-		//	check is user belongs to iitj
-		if (true || domain === 'iitj.ac.in') {
+		//	check is user belongs to allowed domains
+		const restrictDomains = false;
+		const allowedDomains = ['iitj.ac.in'];
+		if (!restrictDomains || allowedDomains.includes(domain)) {
 			//	check if one of the old registered user has re-loggedin
 			const registeredUser = await User.findOne({ email });
 
